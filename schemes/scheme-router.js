@@ -122,6 +122,7 @@ async function findNextStep(req , res , next) {
   const { id } = req.params;
   
   const [countSchemes] = await Schemes.find(id);
+  
   if (countSchemes) {
     const stepNumber = await Schemes.findMaxStep(id);
     req.params.nextStepNumber = stepNumber[0].a + 1;
