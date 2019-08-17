@@ -4,6 +4,8 @@ const Schemes = require('./scheme-model.js');
 
 const router = express.Router();
 
+
+//GET to retreive all schemes
 router.get('/', async (req, res) => {
   try {
     const schemes = await Schemes.find();
@@ -13,6 +15,8 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+//GET to retreive a single scheme
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -29,6 +33,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+//GET to retreive the steps for a given scheme
 router.get('/:id/steps', async (req, res) => {
   const { id } = req.params;
 
@@ -45,6 +50,8 @@ router.get('/:id/steps', async (req, res) => {
   }
 });
 
+
+//POST to add a single scheme
 router.post('/', async (req, res) => {
   const schemeData = req.body;
 
@@ -58,22 +65,21 @@ router.post('/', async (req, res) => {
 
 //POST to create new steps for a given scheme
 router.post('/:id/steps', findNextStep, async (req, res) => {
-  const stepData = req.body;
+  const stepData  = req.body;
   const { id } = req.params; 
-  const nextStepId = req.params.nextStepNumber
-  console.log(id)
-  console.log(nextStepId)
+  const nextStep = req.params.nextStepNumber
+
   try {
     const scheme = await Schemes.findById(id);
 
     if (scheme) {
-      const step = await Schemes.addStep(stepData , nextStepId , id);
+      const step = await Schemes.addStep(stepData , nextStep , id);
       res.status(201).json(step);
     } else {
       res.status(404).json({ message: 'Could not find scheme with given id.' })
     }
   } catch (err) {
-    res.status(500).json({ message: 'Failed to create new step' });
+    res.status(500).json({ message: 'Failed to create new step', err });
   }
 });
 
@@ -116,13 +122,9 @@ async function findNextStep(req , res , next) {
   const { id } = req.params;
   
   const [countSchemes] = await Schemes.find(id);
-
   if (countSchemes) {
-    const StepNumber = await Schemes.findMaxStep(id);
-    console.log(StepNumber)
-    const maxnumber = await Schemes.findMaxStep(id);
-    req.params.nextStepNumber = maxnumber + 1;
-    console.log(`This is my middleware nextIDd, ${req.params.nextStepNumber}`)
+    const stepNumber = await Schemes.findMaxStep(id);
+    req.params.nextStepNumber = stepNumber[0].a + 1;
     next();
   } else {
     res.status(203).json({message: `There was no schemes associated with the id: ${id}`});
