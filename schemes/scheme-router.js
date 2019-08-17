@@ -56,15 +56,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.post('/:id/steps', async (req, res) => {
+//POST to create new steps for a given scheme
+router.post('/:id/steps', findNextStep, async (req, res) => {
   const stepData = req.body;
   const { id } = req.params; 
-
+  const nextStepId = req.params.nextStepNumber
+  console.log(id)
+  console.log(nextStepId)
   try {
     const scheme = await Schemes.findById(id);
 
     if (scheme) {
-      const step = await Schemes.addStep(stepData, id);
+      const step = await Schemes.addStep(stepData , nextStepId , id);
       res.status(201).json(step);
     } else {
       res.status(404).json({ message: 'Could not find scheme with given id.' })
@@ -107,5 +110,24 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to delete scheme' });
   }
 });
+
+//Middleware to process the next step number in the sequence
+async function findNextStep(req , res , next) {
+  const { id } = req.params;
+  
+  const [countSchemes] = await Schemes.find(id);
+
+  if (countSchemes) {
+    const StepNumber = await Schemes.findMaxStep(id);
+    console.log(StepNumber)
+    const maxnumber = await Schemes.findMaxStep(id);
+    req.params.nextStepNumber = maxnumber + 1;
+    console.log(`This is my middleware nextIDd, ${req.params.nextStepNumber}`)
+    next();
+  } else {
+    res.status(203).json({message: `There was no schemes associated with the id: ${id}`});
+  }
+}
+
 
 module.exports = router;
