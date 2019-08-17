@@ -27,17 +27,40 @@ ON Products.CategoryID = Categories.CategoryID
 
 - Display the OrderID and ShipperName for all orders placed before January 9, 1997. Shows 161 records.
 
-
+SELECT OrderID , ShipperName , OrderDate  FROM [Orders]
+JOIN Shippers 
+ON Orders.ShipperID = Shippers.ShipperID
+WHERE Orders.OrderDate < '1997-01-09'
 
 - Display all ProductNames and Quantities placed on order 10251. Sort by ProductName. Shows 3 records.
 
-
+SELECT Orders.OrderID , ProductName , Quantity FROM Orders
+JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+JOIN Products ON OrderDetails.ProductID = Products.ProductID
+WHERE Orders.OrderID = 10251
 
 
 - Display the OrderID, CustomerName and the employee's LastName for every order. All columns should be labeled clearly. Displays 196 records.
 
+SELECT Orders.OrderID, Customers.CustomerName , Employees.LastName FROM Orders
+JOIN Customers ON Orders.CustomerID = Customers.CustomerID
+JOIN Employees ON Orders.EmployeeID = Employees.EmployeeID
 
 
+//SQL STRETCH PROBLEM
+///////////////////////////////////////////////////////
+
+SELECT Categories.CategoryName, COUNT(Products.CategoryID) AS Count  FROM [Products]
+JOIN Categories ON Products.CategoryID = Categories.CategoryID
+GROUP BY Products.CategoryID
+
+//////////////////////////////////////////////////////
+
+SELECT Orders.OrderID , COUNT(OrderDetails.OrderID) AS ItemCount FROM [Orders]
+JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+GROUP BY OrderDetails.OrderID
+
+//////////////////////////////////////////////////////
 ### Database Methods
 
 Write helpers methods in `./schemes/scheme-model.js` that match the following specifications:
@@ -98,7 +121,21 @@ The following endpoints are available to test the functionality of the model met
 
 - In [SQL Try Editor at W3Schools.com](https://www.w3schools.com/Sql/tryit.asp?filename=trysql_select_top):
   - Displays CategoryName and a new column called Count that shows how many products are in each category. Shows 9 records.
+
+    SELECT Categories.CategoryName, COUNT(Products.CategoryID) AS Count  FROM [Products]
+    JOIN Categories ON Products.CategoryID = Categories.CategoryID
+    GROUP BY Products.CategoryID
+
   - Display OrderID and a column called ItemCount that shows the total number of products placed on the order. Shows 196 records.
+
+SELECT Orders.OrderID , COUNT(OrderDetails.OrderID) AS ItemCount FROM [Orders]
+JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+GROUP BY OrderDetails.OrderID
+
+
+
+
+
 - Add the following method to your API
   - `addStep(step, scheme_id)`: This method expects a step object and a scheme id. It inserts the new step into the database, correctly linking it to the intended scheme.
   - You may use `POST /api/schemes/:id/addStep` to test this method.
